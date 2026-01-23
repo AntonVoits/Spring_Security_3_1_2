@@ -1,7 +1,8 @@
 <!DOCTYPE html>
-<html xmlns="http://www.w3.org/1999/xhtml" xmlns:th="https://www.thymeleaf.org">
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
 <head>
-    <title>Spring Security Example</title>
+    <meta charset="UTF-8">
+    <title>User List</title>
     <style>
         body {
             display: flex;
@@ -57,36 +58,47 @@
             background-color: #dc3545;
         }
 
+        .btn-success {
+            background-color: #28a745;
+        }
+
+        .btn:hover {
+            opacity: 0.8;
+        }
+
         caption {
             font-size: 1.5em;
             margin-bottom: 10px;
             font-weight: bold;
         }
-
     </style>
 </head>
 <body>
 <table>
-    <caption>User:</caption>
+    <caption>All users table</caption>
     <thead>
     <tr>
-        <th>Id</th>
-        <th>Username</th>
-        <th>Password</th>
-        <th>Role</th>
+        <th>User</th>
+        <th>Actions</th>
     </tr>
     </thead>
     <tbody>
-    <tr th:each="u : ${users}">
-        <td th:text="${u.id}"></td>
-        <td th:text="${u.username}"></td>
-        <td th:text="${u.password}"></td>
-        <td th:text="${u.roles}"></td>
+    <tr th:each="user : ${allUsers}">
+        <td th:text="${user.username}"></td>
+        <td>
+            <a th:href="@{/admin/update-user(username=${user.username})}" class="btn">Update</a>
+            <form th:action="@{/admin/delete-user}" method="post" style="display: inline;">
+                <input type="hidden" name="id" th:value="${user.id}" />
+                <button type="submit" class="btn btn-danger">Delete</button>
+            </form>
+        </td>
     </tr>
     </tbody>
 </table>
+<br>
 <div>
     <a href="/login" class="btn btn-danger">Logout</a>
+    <a href="/admin/add-new-user" class="btn btn-success">Add</a>
 </div>
 </body>
 </html>
