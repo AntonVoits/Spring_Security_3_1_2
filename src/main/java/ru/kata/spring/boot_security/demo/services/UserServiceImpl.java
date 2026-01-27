@@ -48,18 +48,36 @@ public class UserServiceImpl implements UserDetailsService, UserService {
     }
 
     public User updateUser(User updatedUser, String newPassword) {
-        User existingUser = userRepository.findById(updatedUser.getId())
-                .orElseThrow(() -> new UsernameNotFoundException("User not found"));
-        User userByUsername = userRepository.findByUsername(updatedUser.getUsername());
-        if (userByUsername != null && !userByUsername.getId().equals(existingUser.getId())) {
-            throw new IllegalArgumentException("Username already taken");
+        try {
+            User existingUser = userRepository.findById(updatedUser.getId())
+                    .orElseThrow(() -> new UsernameNotFoundException("User not found"));
+
+            if (!existingUser.getEmail().equals(updatedUser.getEmail())) {
+                User userByEmail = userRepository.findByUsername(updatedUser.getEmail());
+                if (userByEmail != null && !userByEmail.getId().equals(existingUser.getId())) {
+                    throw new IllegalArgumentException("Email already taken");
+                }
+            }
+            existingUser.setAge(updatedUser.getAge());
+            existingUser.setEmail(updatedUser.getEmail());
+            existingUser.setFirstName(updatedUser.getFirstName());
+            existingUser.setLastName(updatedUser.getLastName());
+
+            if (updatedUser.getRoles() != null && !updatedUser.getRoles().isEmpty()) {
+                existingUser.setRoles(updatedUser.getRoles());
+            }
+
+            if (newPassword != null && !newPassword.isEmpty()) {
+                existingUser.setPassword(passwordEncoder.encode(newPassword));
+            }
+
+            User savedUser = userRepository.save(existingUser);
+
+            return savedUser;
+        } catch (Exception e) {
+            e.printStackTrace();
+            throw e;
         }
-        if (newPassword != null && !newPassword.isEmpty()) {
-            existingUser.setPassword(passwordEncoder.encode(newPassword));
-        }
-        existingUser.setUsername(updatedUser.getUsername());
-        existingUser.setRoles(updatedUser.getRoles());
-        return userRepository.save(existingUser);
     }
 
     public void deleteUser(Long id) {

@@ -28,15 +28,25 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
     @Override
     protected void configure(HttpSecurity http) throws Exception {
         http
+                .csrf().disable() // Отключаем CSRF для API
                 .authorizeRequests()
+                .antMatchers("/api/users/**").hasRole("ADMIN")
+                .antMatchers("/api/current-user").authenticated()
+                .antMatchers("/api/roles").hasRole("ADMIN")
                 .antMatchers("/admin/**").hasRole("ADMIN")
-                .antMatchers("/user").hasAnyRole("USER", "ADMIN")
+                .antMatchers("/api/user").hasAnyRole("USER", "ADMIN")
                 .antMatchers("/").authenticated()
                 .and()
-                .formLogin().successHandler(successUserHandler)
+                .formLogin()
+                .loginPage("/login-page")
+                .successHandler(successUserHandler)
                 .permitAll()
                 .and()
                 .logout()
+                .logoutUrl("/logout")
+                .logoutSuccessUrl("/login-page?logout")
+                .invalidateHttpSession(true)
+                .deleteCookies("JSESSIONID")
                 .permitAll();
     }
 

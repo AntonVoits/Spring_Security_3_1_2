@@ -17,7 +17,17 @@ public class User implements UserDetails {
     private Long id;
 
     @Column(nullable = false, unique = true)
-    private String username;
+    private String email;
+
+    @Column(nullable = false, unique = true)
+    private String firstName;
+
+    @Column(nullable = false, unique = true)
+    private String lastName;
+
+    @Column
+    private int age;
+
 
     @Column(nullable = false)
     private String password;
@@ -29,6 +39,8 @@ public class User implements UserDetails {
             inverseJoinColumns = @JoinColumn(name = "role_id")
     )
     private Set<Role> roles = new HashSet<>();
+
+    private String formattedRoles;
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
@@ -42,7 +54,7 @@ public class User implements UserDetails {
 
     @Override
     public String getUsername() {
-        return username;
+        return email;
     }
 
     @Override
@@ -68,8 +80,44 @@ public class User implements UserDetails {
     public User() {
     }
 
-    public void setUsername(String username) {
-        this.username = username;
+    public String getFormattedRoles() {
+        return formattedRoles;
+    }
+
+    public void setFormattedRoles(String formattedRoles) {
+        this.formattedRoles = formattedRoles;
+    }
+
+    public String getEmail() {
+        return email;
+    }
+
+    public void setEmail(String email) {
+        this.email = email;
+    }
+
+    public String getFirstName() {
+        return firstName;
+    }
+
+    public void setFirstName(String firstName) {
+        this.firstName = firstName;
+    }
+
+    public String getLastName() {
+        return lastName;
+    }
+
+    public void setLastName(String lastName) {
+        this.lastName = lastName;
+    }
+
+    public int getAge() {
+        return age;
+    }
+
+    public void setAge(int age) {
+        this.age = age;
     }
 
     public void setPassword(String password) {
@@ -110,7 +158,10 @@ public class User implements UserDetails {
     public String toString() {
         return "User{" +
                 "id=" + id +
-                ", username='" + username + '\'' +
+                ", email='" + email + '\'' +
+                ", firstName='" + firstName + '\'' +
+                ", lastName='" + lastName + '\'' +
+                ", age=" + age +
                 ", password='" + password + '\'' +
                 ", roles=" + roles +
                 '}';
