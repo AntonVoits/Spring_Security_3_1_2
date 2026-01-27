@@ -31,14 +31,20 @@ public class testUsers implements CommandLineRunner {
         }
         if (userService.findAllUsers().isEmpty()) {
             User admin = new User();
-            admin.setUsername("admin");
+            admin.setEmail("admin@mail.ru");
             admin.setPassword("admin");
+            admin.setFirstName("Dave");
+            admin.setLastName("Mustaine");
+            admin.setAge(64);
             admin.setRoles(Set.of(roleService.findByName("ROLE_ADMIN"), roleService.findByName("ROLE_USER")));
             userService.saveUser(admin);
 
             User user = new User();
-            user.setUsername("user");
+            user.setEmail("user@mail.ru");
             user.setPassword("user");
+            user.setFirstName("James");
+            user.setLastName("Hetfield");
+            user.setAge(62);
             user.setRoles(Set.of(roleService.findByName("ROLE_USER")));
             userService.saveUser(user);
         }
