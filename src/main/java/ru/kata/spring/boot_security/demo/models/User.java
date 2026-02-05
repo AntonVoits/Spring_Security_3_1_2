@@ -19,10 +19,10 @@ public class User implements UserDetails {
     @Column(nullable = false, unique = true)
     private String email;
 
-    @Column(nullable = false, unique = true)
+    @Column(nullable = false)
     private String firstName;
 
-    @Column(nullable = false, unique = true)
+    @Column(nullable = false)
     private String lastName;
 
     @Column
@@ -162,7 +162,6 @@ public class User implements UserDetails {
                 ", firstName='" + firstName + '\'' +
                 ", lastName='" + lastName + '\'' +
                 ", age=" + age +
-                ", password='" + password + '\'' +
                 ", roles=" + roles +
                 '}';
     }

@@ -10,8 +10,8 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 import ru.kata.spring.boot_security.demo.models.Role;
 import ru.kata.spring.boot_security.demo.models.User;
-import ru.kata.spring.boot_security.demo.services.RoleServiceImpl;
-import ru.kata.spring.boot_security.demo.services.UserServiceImpl;
+import ru.kata.spring.boot_security.demo.services.RoleService;
+import ru.kata.spring.boot_security.demo.services.UserService;
 
 import java.security.Principal;
 import java.util.List;
@@ -21,21 +21,21 @@ import java.util.stream.Collectors;
 @RequestMapping("/api")
 @PreAuthorize("hasRole('ADMIN')")
 public class AdminPageController {
-    private final RoleServiceImpl roleServiceImpl;
-    private final UserServiceImpl userServiceImpl;
+    private final RoleService roleService;
+    private final UserService userService;
 
     @Autowired
-    public AdminPageController(RoleServiceImpl roleServiceImpl, UserServiceImpl userServiceImpl) {
-        this.roleServiceImpl = roleServiceImpl;
-        this.userServiceImpl = userServiceImpl;
+    public AdminPageController(RoleService roleService, UserService userService) {
+        this.roleService = roleService;
+        this.userService = userService;
     }
 
     @GetMapping("/current-user")
     public ResponseEntity<User> getCurrentUser(Authentication authentication) {
         String username = authentication.getName();
-        User currentUser = userServiceImpl.findByUserName(username);
+        User currentUser = userService.findByUserName(username);
         if (currentUser != null) {
-            currentUser.setFormattedRoles(roleServiceImpl.formatRoles(currentUser.getRoles()));
+            currentUser.setFormattedRoles(roleService.formatRoles(currentUser.getRoles()));
             return new ResponseEntity<>(currentUser, HttpStatus.OK);
         }
         return new ResponseEntity<>(HttpStatus.NOT_FOUND);
@@ -44,8 +44,8 @@ public class AdminPageController {
     @GetMapping("/users")
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<List<User>> loadUsers() {
-        List<User> users = userServiceImpl.findAllUsers().stream()
-                .peek(user -> user.setFormattedRoles(roleServiceImpl.formatRoles(user.getRoles())))
+        List<User> users = userService.findAllUsers().stream()
+                .peek(user -> user.setFormattedRoles(roleService.formatRoles(user.getRoles())))
                 .collect(Collectors.toList());
         return new ResponseEntity<>(users, HttpStatus.OK);
     }
@@ -53,9 +53,9 @@ public class AdminPageController {
     @GetMapping("/users/{id}")
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<User> getUser(@PathVariable Long id) {
-        User user = userServiceImpl.findById(id);
+        User user = userService.findById(id);
         if (user != null) {
-            user.setFormattedRoles(roleServiceImpl.formatRoles(user.getRoles()));
+            user.setFormattedRoles(roleService.formatRoles(user.getRoles()));
             return new ResponseEntity<>(user, HttpStatus.OK);
         }
         return new ResponseEntity<>(HttpStatus.NOT_FOUND);
@@ -68,7 +68,7 @@ public class AdminPageController {
             Principal principal
     ) {
         try {
-            User existingUser = userServiceImpl.findById(id);
+            User existingUser = userService.findById(id);
             if (existingUser == null) {
                 return ResponseEntity.notFound().build();
             }
@@ -87,7 +87,7 @@ public class AdminPageController {
                 updatedUser.setRoles(existingUser.getRoles());
             }
 
-            User savedUser = userServiceImpl.updateUser(existingUser, updatedUser.getPassword());
+            User savedUser = userService.updateUser(existingUser, updatedUser.getPassword());
 
             if (principal.getName().equals(existingUser.getEmail())) {
                 Authentication auth = new UsernamePasswordAuthenticationToken(
@@ -103,33 +103,33 @@ public class AdminPageController {
 
     @PostMapping("/users")
     public ResponseEntity<User> createUser(@RequestBody User user) {
-        if (userServiceImpl.findByUserName(user.getEmail()) != null) {
+        if (userService.findByUserName(user.getEmail()) != null) {
             return ResponseEntity.status(HttpStatus.CONFLICT).build();
         }
 
-        User savedUser = userServiceImpl.saveUser(user);
+        User savedUser = userService.saveUser(user);
         return ResponseEntity.status(HttpStatus.CREATED).body(savedUser);
     }
 
     @DeleteMapping("/users/{id}")
     public ResponseEntity<Void> deleteUser(@PathVariable Long id, Principal principal) {
-        User user = userServiceImpl.findById(id);
+        User user = userService.findById(id);
         if (user == null) {
             return ResponseEntity.notFound().build();
         }
         if (user.getUsername().equals(principal.getName())) {
-            userServiceImpl.deleteUser(id);
+            userService.deleteUser(id);
             SecurityContextHolder.clearContext();
             return ResponseEntity.status(HttpStatus.RESET_CONTENT).build();
         }
 
-        userServiceImpl.deleteUser(id);
+        userService.deleteUser(id);
         return ResponseEntity.noContent().build();
     }
 
     @GetMapping("/roles")
     public ResponseEntity<List<Role>> getAllRoles() {
-        List<Role> roles = roleServiceImpl.getAllRoles();
+        List<Role> roles = roleService.getAllRoles();
         return ResponseEntity.ok(roles);
     }
 }
